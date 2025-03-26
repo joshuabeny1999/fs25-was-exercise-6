@@ -22,7 +22,14 @@ lights("off").
 */
 @start_plan
 +!start : td("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#Lights", Url) <-
-    .print("Hello world").
+    .print("Hello world");
+    .my_name(MyName);
+    makeArtifact("mqttArtifactL", "room.MQTTArtifact", [MyName], MQTTId);
+    focus(MQTTId).
+
+@message_plan
++message(Sender, "tell", Content) : true <-
+    .print("Lights manager received message from ", Sender, ": ", Content).
 
 /* Import behavior of agents that work in CArtAgO environments */
 { include("$jacamoJar/templates/common-cartago.asl") }
