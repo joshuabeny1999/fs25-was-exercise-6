@@ -36,6 +36,7 @@ td("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#CalendarServic
     readProperty("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#ReadUpcomingEvent", EventList);
     .nth(0, EventList, Event);
     .print("Upcoming event: ", Event);
+    .send("personal_assistant", tell, upcoming_event(Event));
     .wait(5000);
     !read_upcoming_event.
 

@@ -23,9 +23,7 @@ blinds("lowered").
     makeArtifact("blinds", "org.hyperagents.jacamo.artifacts.wot.ThingArtifact", [Url], ArtId);
     .my_name(MyName);
     makeArtifact("mqttArtifactB", "room.MQTTArtifact", [MyName], MQTTId);
-    focus(MQTTId);
-    .wait(5000);
-    !raise_blinds.
+    focus(MQTTId).
 
 @message_plan
 +message(Sender, "tell", Content) : true <-
@@ -43,7 +41,8 @@ blinds("lowered").
     invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState",["raised"]);
     .print("Blinds raised");
     -+blinds("lowered");
-    +blinds("raised").
+    +blinds("raised");
+    .send("personal_assistant", tell, blinds("raised")).
 
  /* 
  * Plan for lowering the blinds.
@@ -57,6 +56,8 @@ blinds("lowered").
     invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState",["lowered"]);
     .print("Blinds lowered");
     -+blinds("raised");
-    +blinds("lowered").
+    +blinds("lowered");
+    .send("personal_assistant", tell, blinds("lowered")).
+
 
 { include("$jacamoJar/templates/common-cartago.asl") }
