@@ -25,6 +25,21 @@ blinds("lowered").
     makeArtifact("mqttArtifactB", "room.MQTTArtifact", [MyName], MQTTId);
     focus(MQTTId).
 
+@cfp_plan_lower_blinds
++message(PA, tell, cfp(wake_up("increase illuminance"))) : blinds("lowered") <-
+    .print("Blinds controller: sending proposal (natural_light, 0)");
+    .send(PA, tell, proposal(natural_light, 0)).
+
+@cfp_plan_raised_blinds
++message(PA, tell, cfp(wake_up("increase illuminance"))) : blinds("raised") <-
+    .print("Blinds controller: refusing CFP (blinds already raised)");
+    .send(PA, tell, refuse("Blinds already raised")).
+
+@accept_proposal_plan
++message(PA, tell, accept_proposal(natural_light)) : true <-
+    .print("Blinds controller received acceptance. Raising blinds...");
+    !raise_blinds.
+
 @message_plan
 +message(Sender, "tell", Content) : true <-
     .print("Blinds manager received message from ", Sender, ": ", Content).

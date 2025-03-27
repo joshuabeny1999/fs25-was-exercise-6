@@ -28,6 +28,21 @@ lights("off").
     makeArtifact("mqttArtifactL", "room.MQTTArtifact", [MyName], MQTTId);
     focus(MQTTId).
 
+@cfp_plan_lights_off
++message(PA, tell, cfp(wake_up("increase illuminance"))) : lights("off") <-
+    .print("Lights controller: sending proposal (artificial_light, 1)");
+    .send(PA, tell, proposal(artificial_light, 1)).
+
+@cfp_plan_lights_on
++message(PA, tell, cfp(wake_up("increase illuminance"))) : lights("on") <-
+    .print("Lights controller: refusing CFP (lights already on)");
+    .send(PA, tell, refuse("Lights already on")).
+
+@accept_proposal_plan
++message(PA, tell, accept_proposal(artificial_light)) : true <-
+    .print("Lights controller received acceptance. Turning lights on...");
+    !turn_lights_on.
+
 @message_plan
 +message(Sender, "tell", Content) : true <-
     .print("Lights manager received message from ", Sender, ": ", Content).
