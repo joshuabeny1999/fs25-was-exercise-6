@@ -22,14 +22,45 @@ lights("off").
 */
 @start_plan
 +!start : td("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#Lights", Url) <-
-    .print("Hello world");
+    .print("Lights controller starting...");
+    makeArtifact("lights", "org.hyperagents.jacamo.artifacts.wot.ThingArtifact", [Url], ArtId);
     .my_name(MyName);
     makeArtifact("mqttArtifactL", "room.MQTTArtifact", [MyName], MQTTId);
-    focus(MQTTId).
+    focus(MQTTId);
+    .wait(5000);
+    !turn_lights_on.
 
 @message_plan
 +message(Sender, "tell", Content) : true <-
     .print("Lights manager received message from ", Sender, ": ", Content).
+
+/* 
+ * Plan for turning on the lights.
+ * Triggered by the goal !turn__lights_on.
+ * Context: true.
+ * Body: the agent invokes the action affordance was:SetState with input "on".
+ *       It prints the response and updates its belief.
+ */
+@turn_on_plan
++!turn_lights_on : true <-
+    invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState", ["on"]);
+    .print("Lights turned on");
+    -+lights("off");
+    +lights("on").
+
+ /* 
+ * Plan for turning off the lights.
+ * Triggered by the goal !turn_lights_off.
+ * Context: true.
+ * Body: the agent invokes the action affordance was:SetState with input "off".
+ *       It prints the response and updates its belief.
+ */
+@turn_off_plan
++!turn_lights_off : true <-
+    invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState", ["off"]);
+    .print("Lights turned off");
+    -+lights("on");
+    +lights("off").
 
 /* Import behavior of agents that work in CArtAgO environments */
 { include("$jacamoJar/templates/common-cartago.asl") }

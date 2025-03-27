@@ -15,7 +15,7 @@ broadcast(jason).
 */
 @start_plan
 +!start : true <-
-    .print("Hello world");
+    .print("Personal assistant starting...");
     .my_name(MyName);
     makeArtifact("mqttArtifactPA", "room.MQTTArtifact", [MyName], MQTTId);
     focus(MQTTId);

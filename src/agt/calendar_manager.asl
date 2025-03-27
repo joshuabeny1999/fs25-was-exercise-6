@@ -19,7 +19,25 @@ td("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#CalendarServic
 */
 @start_plan
 +!start : td("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#CalendarService", Url) <-
-    .print("Hello world").
+    .print("Calendar manager starting...");
+    // Create a ThingArtifact for the calendar service using the TD URL
+    makeArtifact("calendar", "org.hyperagents.jacamo.artifacts.wot.ThingArtifact", [Url], ArtId);
+    !read_upcoming_event.
+
+/* 
+ * Plan for reading the upcoming event.
+ * Triggering event: addition of goal !read_upcoming_event.
+ * Context: true.
+ * Body: every 5000ms, the agent reads the property affordance was:ReadUpcomingEvent (which returns a list of event values),
+ *       extracts the first element (e.g., "now"), prints it, and then re-creates the goal.
+ */
+@read_upcoming_event_plan
++!read_upcoming_event : true <-
+    readProperty("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#ReadUpcomingEvent", EventList);
+    .nth(0, EventList, Event);
+    .print("Upcoming event: ", Event);
+    .wait(5000);
+    !read_upcoming_event.
 
 /* Import behavior of agents that work in CArtAgO environments */
 { include("$jacamoJar/templates/common-cartago.asl") }
