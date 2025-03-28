@@ -22,6 +22,7 @@ td("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#CalendarServic
     .print("Calendar manager starting...");
     // Create a ThingArtifact for the calendar service using the TD URL
     makeArtifact("calendar", "org.hyperagents.jacamo.artifacts.wot.ThingArtifact", [Url], ArtId);
+    .wait(5000);
     !read_upcoming_event.
 
 /* 

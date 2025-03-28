@@ -26,22 +26,25 @@ blinds("lowered").
     focus(MQTTId).
 
 @cfp_plan_lower_blinds
-+message(PA, tell, cfp(wake_up("increase illuminance"))) : blinds("lowered") <-
-    .print("Blinds controller: sending proposal (natural_light, 0)");
-    .send(PA, tell, proposal(natural_light, 0)).
++message(Sender, "tell", "cfp(wake_up(increase_illuminance))") : blinds("lowered") <-
+    .print("Blinds controller: sending proposal natural_light");
+    .send(Sender, tell, propose(natural_light, "blinds_controller")).
 
 @cfp_plan_raised_blinds
-+message(PA, tell, cfp(wake_up("increase illuminance"))) : blinds("raised") <-
++message(Sender, "tell", "cfp(wake_up(increase_illuminance))") : blinds("raised") <-
     .print("Blinds controller: refusing CFP (blinds already raised)");
-    .send(PA, tell, refuse("Blinds already raised")).
+    .abolish(message(_, _, _));
+    .send(Sender, tell, refuse("Blinds already raised", "blinds_controller")).
 
 @accept_proposal_plan
-+message(PA, tell, accept_proposal(natural_light)) : true <-
++accept_proposal(natural_light) : true <-
     .print("Blinds controller received acceptance. Raising blinds...");
+    .abolish(message(_, _, _));
     !raise_blinds.
 
 @message_plan
 +message(Sender, "tell", Content) : true <-
+    .abolish(message(_, _, _));
     .print("Blinds manager received message from ", Sender, ": ", Content).
 
 /* 
@@ -55,8 +58,7 @@ blinds("lowered").
 +!raise_blinds : true <-
     invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState",["raised"]);
     .print("Blinds raised");
-    -+blinds("lowered");
-    +blinds("raised");
+    -+blinds("raised");
     .send("personal_assistant", tell, blinds("raised")).
 
  /* 
@@ -70,8 +72,7 @@ blinds("lowered").
 +!lower_blinds : true <-
     invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState",["lowered"]);
     .print("Blinds lowered");
-    -+blinds("raised");
-    +blinds("lowered");
+    -+blinds("lowered");
     .send("personal_assistant", tell, blinds("lowered")).
 
 

@@ -29,22 +29,25 @@ lights("off").
     focus(MQTTId).
 
 @cfp_plan_lights_off
-+message(PA, tell, cfp(wake_up("increase illuminance"))) : lights("off") <-
-    .print("Lights controller: sending proposal (artificial_light, 1)");
-    .send(PA, tell, proposal(artificial_light, 1)).
++message(PA, "tell", "cfp(wake_up(increase_illuminance))") : lights("off") <-
+    .print("Lights controller: sending proposal artificial_light");
+    .abolish(message(_, _, _));
+    .send(PA, tell, propose(artificial_light, "lights_controller")).
 
 @cfp_plan_lights_on
-+message(PA, tell, cfp(wake_up("increase illuminance"))) : lights("on") <-
++message(PA, "tell", "cfp(wake_up(increase_illuminance))") : lights("on") <-
     .print("Lights controller: refusing CFP (lights already on)");
-    .send(PA, tell, refuse("Lights already on")).
+    .abolish(message(_, _, _));
+    .send(PA, tell, refuse("Lights already on", "lights_controller")).
 
 @accept_proposal_plan
-+message(PA, tell, accept_proposal(artificial_light)) : true <-
++accept_proposal(artificial_light) : true <-
     .print("Lights controller received acceptance. Turning lights on...");
     !turn_lights_on.
 
 @message_plan
 +message(Sender, "tell", Content) : true <-
+    .abolish(message(_, _, _));
     .print("Lights manager received message from ", Sender, ": ", Content).
 
 /* 
@@ -58,8 +61,7 @@ lights("off").
 +!turn_lights_on : true <-
     invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState", ["on"]);
     .print("Lights turned on");
-    -+lights("off");
-    +lights("on");
+    -+lights("on");
     .send("personal_assistant", tell, lights("on")).
 
 
@@ -74,8 +76,7 @@ lights("off").
 +!turn_lights_off : true <-
     invokeAction("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#SetState", ["off"]);
     .print("Lights turned off");
-    -+lights("on");
-    +lights("off");
+    -+lights("off");
     .send("personal_assistant", tell, lights("off")).
 
 

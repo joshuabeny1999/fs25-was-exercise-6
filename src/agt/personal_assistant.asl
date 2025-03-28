@@ -38,7 +38,8 @@ wake_up_ranking(artificial_light, 1).
     .print("Personal assistant starting...");
     .my_name(MyName);
     makeArtifact("mqttArtifactPA", "room.MQTTArtifact", [MyName], MQTTId);
-    focus(MQTTId).
+    focus(MQTTId);
+    -+mqqt_initalized("true").
 
 
 @message_plan
@@ -64,7 +65,7 @@ wake_up_ranking(artificial_light, 1).
     !send_mqtt(Sender, Performative, Content).
 
 +!selective_broadcast(Sender, Performative, Content) : broadcast(jason) <-
-    .broadcast(Performative, Content);
+    .broadcast(tell, message(Sender, Performative, Content));
     .print("Broadcasting via Jason: ", Content).
 
 @handle_upcoming_event_awake_plan
@@ -76,15 +77,14 @@ wake_up_ranking(artificial_light, 1).
 
 @handle_upcoming_event_asleep_plan
 +upcoming_event("now")
-    : owner_asleep
-    <-
-    .print("Starting wake-up routine");
-    !initiate_cfp.
+    : owner_asleep  <-
+        .print("Starting wake-up routine");
+        !initiate_cfp.
 
 @initiate_cfp_plan_owner_asleep
 +!initiate_cfp : owner_asleep <-
     .print("Broadcasting CFP for wake-up task");
-    !selective_broadcast("personal_assistant", tell, cfp(wake_up("increase illuminance")));
+    !selective_broadcast("personal_assistant", "tell", "cfp(wake_up(increase_illuminance))");
     .wait(5000);
     !process_proposals.
 
@@ -96,26 +96,28 @@ wake_up_ranking(artificial_light, 1).
 
 
 @process_proposals_plan_natural_light
-+!process_proposals : best_option(natural_light) & proposal(Agent, proposal(natural_light, _)) <-
-    .send(Agent, tell, "accept_proposal(natural_light)");
++!process_proposals : best_option(natural_light) & propose(natural_light, Agent) <-
+    .send(Agent, tell, accept_proposal(natural_light));
     +used_method(natural_light);
+    .abolish(propose(_, _));
     .wait(2000);
     !initiate_cfp.
 
 @process_proposals_plan_artifical_light
-+!process_proposals : best_option(artificial_light) & proposal(Agent, proposal(artifical_light, _)) <-
-    .send(Agent, tell, "accept_proposal(artifical_light)");
-    +used_method(natural_light);
++!process_proposals : best_option(artificial_light) & propose(artificial_light, Agent) <-
+    .send(Agent, tell, accept_proposal(artificial_light));
+    +used_method(artificial_light);
+    .abolish(propose(_, _));
     .wait(2000);
     !initiate_cfp.
 
 @process_proposals_plan_no_proposal_everything_tried
-+!process_proposals : not proposal(_, _) & used_method(natural_light) & used_method(artifical_light) <-
++!process_proposals : not propose(_,_) & used_method(natural_light) & used_method(artificial_light) <-
     .print("No proposals received; delegating wake-up to a friend");
-    !send_mqtt("friend", achieve, wake_up("please wake up our user")).
+    !send_mqtt("friend", achieve, "please wake up our user").
 
 @process_proposals_plan_no_proposal
-+!process_proposals : not proposal(_, _) <-
++!process_proposals : not propose(_,_) <-
     .print("No proposals received; trying again asking for proposals");
     !initiate_cfp.
 
