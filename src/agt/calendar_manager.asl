@@ -38,7 +38,7 @@ td("https://was-course.interactions.ics.unisg.ch/wake-up-ontology#CalendarServic
     .nth(0, EventList, Event);
     .print("Upcoming event: ", Event);
     .send("personal_assistant", tell, upcoming_event(Event));
-    .wait(5000);
+    .wait(60000);
     !read_upcoming_event.
 
 /* Import behavior of agents that work in CArtAgO environments */
